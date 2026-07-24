@@ -576,7 +576,9 @@
 "use strict";
 
 /* ================= CONFIG ================= */
-
+// Si quieres fijar la URL de Apps Script directamente en el código (para no
+// tener que pegarla cada vez que alguien nuevo abre el sitio), reemplaza la
+// cadena vacía de abajo por tu URL, terminada en "/exec".
 const DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyTIwDllLeGcwFRNfb_0M1kb6JtycY17F0rgX9EO75zSNQgKn9gTv1UU1fZI9ozYqAmA/exec';
 const LS_URL_KEY = 'calGerencia_scriptUrl';
 const LS_THEME_KEY = 'calGerencia_theme';
@@ -762,7 +764,7 @@ async function init(){
   updateEditorUI();
   updateConnectionStatus();
   renderSidebar();
-  document.getElementById('sidebarSticker').innerHTML = plantSticker('sprig', 64);
+  document.getElementById('sidebarSticker').innerHTML = '<img class="plant-sticker" src="sidebar-plant.png" alt="" style="width:72px;height:auto;">';
   document.getElementById('loginSticker').innerHTML = plantSticker('sprig', 34);
   if(!getScriptUrl()){
     renderConnectionError('no_url');
