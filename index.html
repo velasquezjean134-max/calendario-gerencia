@@ -152,7 +152,7 @@
   .topbar-ok-icon{color:#fff !important;background:rgba(255,255,255,0.12) !important;border-color:rgba(255,255,255,0.24) !important;}
 
   /* ---------- Layout ---------- */
-  .app-body{flex:1;display:flex;min-height:0;}
+  .app-body{flex:1;display:flex;min-height:0;position:relative;}
   .sidebar{width:236px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:18px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:22px;}
   .sidebar-section-title{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:650;margin-bottom:10px;}
   .cal-type-row, .cat-row{display:flex;align-items:center;gap:9px;padding:6px 4px;border-radius:7px;cursor:pointer;font-size:13.5px;user-select:none;}
@@ -173,9 +173,9 @@
 
   /* ---------- Month view ---------- */
   .month-wrap{flex:1;display:flex;flex-direction:column;min-height:0;}
-  .weekday-header{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border);flex-shrink:0;}
+  .weekday-header{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-bottom:1px solid var(--border);flex-shrink:0;}
   .weekday-header div{padding:9px 10px;font-size:11.5px;font-weight:650;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
-  .month-grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;overflow-y:auto;}
+  .month-grid{flex:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:1fr;overflow-y:auto;}
   .day-cell{
     border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:6px 6px 8px;
     display:flex;flex-direction:column;gap:4px;min-height:104px;position:relative;z-index:0;
@@ -387,15 +387,51 @@
   .modal-sticker{position:absolute;top:-14px;right:14px;transform:rotate(8deg);pointer-events:none;}
   .modal-sticker .plant-sticker{width:52px;height:52px;}
 
+  /* Grupos "invisibles" en escritorio: display:contents hace que estos envoltorios
+     no alteren para nada el layout actual del topbar. Solo se activan como
+     contenedores flex reales dentro del media query de abajo, para permitir que
+     la barra superior se acomode en más de una fila en pantallas angostas. */
+  .tb-group{display:contents;}
+
   .mobile-only{display:none;}
   @media (max-width:860px){
-    .sidebar{position:fixed;left:0;top:57px;bottom:0;z-index:40;transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow);}
+    .app-body{position:relative;}
+    .sidebar{position:absolute;left:0;top:0;bottom:0;z-index:40;transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow);}
     .sidebar.open{transform:translateX(0);}
     .mobile-only{display:flex;}
-    .period-label{min-width:auto;font-size:13.5px;}
     .brand-text span{display:none;}
     .btn span.btn-label{display:none;}
+    #btnAuth .btn-label{display:inline;}
     .hover-preview{display:none;}
+
+    /* ---- Topbar: se acomoda en varias filas en vez de recortar contenido ---- */
+    .topbar{flex-wrap:wrap;row-gap:8px;padding:8px 12px;}
+    .tb-group{display:flex;align-items:center;gap:8px;min-width:0;}
+    .tb-left{flex:1 1 auto;min-width:0;}
+    .tb-left .brand{min-width:0;margin-right:0;}
+    .tb-left .brand-text{min-width:0;overflow:hidden;}
+    .tb-left .brand-text strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+    .tb-actions{flex:0 0 auto;gap:6px;flex-wrap:wrap;justify-content:flex-end;row-gap:6px;}
+    .topbar-spacer{display:none;}
+    .tb-nav{order:10;flex-basis:100%;width:100%;justify-content:space-between;gap:6px;flex-wrap:wrap;row-gap:6px;}
+    .tb-nav .segmented, .tb-nav .nav-cluster{flex-shrink:0;}
+    .period-label{min-width:0;font-size:13px;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+    /* ---- Modales: un poco más de ancho disponible en pantallas angostas ---- */
+    .overlay{padding:12px;}
+    .field-row{flex-direction:column;gap:0;}
+
+    /* ---- Vista de mes: celdas y texto más compactos ---- */
+    .day-cell{min-height:72px;padding:4px 3px 6px;}
+    .day-num{font-size:11px;width:18px;height:18px;}
+    .weekday-header div{padding:6px 2px;font-size:9.5px;}
+    .chip{font-size:10px;padding:2.5px 4px;gap:3px;}
+    .chip .cal-type-icon{width:10px;height:10px;}
+    .more-link{font-size:10px;}
+
+    /* ---- Vista de semana/día: cabecera de horas más angosta ---- */
+    .time-header-cell{padding:6px 3px;}
+    .gutter-hour span{font-size:9.5px;right:4px;}
   }
   .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:39;}
   .scrim.show{display:block;}
@@ -408,40 +444,46 @@
 <body data-theme="light">
 
 <div class="topbar">
-  <button class="btn-icon mobile-only" id="btnMenu" aria-label="Menú"></button>
-  <div class="brand">
-    <div class="brand-mark">
-      <img src="logo.png" alt="Logo de la Gerencia">
-    </div>
-    <div class="brand-text">
-      <strong>Calendario de Gerencia</strong>
-      <span>Programación de actividades</span>
+  <div class="tb-group tb-left">
+    <button class="btn-icon mobile-only" id="btnMenu" aria-label="Menú"></button>
+    <div class="brand">
+      <div class="brand-mark">
+        <img src="logo.png" alt="Logo de la Gerencia">
+      </div>
+      <div class="brand-text">
+        <strong>Calendario de Gerencia</strong>
+        <span>Programación de actividades</span>
+      </div>
     </div>
   </div>
 
-  <div class="segmented" id="viewSwitch">
-    <button class="seg-btn" data-view="month">Mes</button>
-    <button class="seg-btn" data-view="week">Semana</button>
-    <button class="seg-btn" data-view="day">Día</button>
-  </div>
+  <div class="tb-group tb-nav">
+    <div class="segmented" id="viewSwitch">
+      <button class="seg-btn" data-view="month">Mes</button>
+      <button class="seg-btn" data-view="week">Semana</button>
+      <button class="seg-btn" data-view="day">Día</button>
+    </div>
 
-  <div class="nav-cluster">
-    <button class="btn-icon" id="btnPrev" aria-label="Anterior"></button>
-    <button class="btn-today" id="btnToday">Hoy</button>
-    <button class="btn-icon" id="btnNext" aria-label="Siguiente"></button>
+    <div class="nav-cluster">
+      <button class="btn-icon" id="btnPrev" aria-label="Anterior"></button>
+      <button class="btn-today" id="btnToday">Hoy</button>
+      <button class="btn-icon" id="btnNext" aria-label="Siguiente"></button>
+    </div>
+    <div class="period-label" id="periodLabel">—</div>
   </div>
-  <div class="period-label" id="periodLabel">—</div>
 
   <div class="topbar-spacer"></div>
 
-  <span id="connStatus"></span>
-  <span id="editorStatus"></span>
-  <button class="btn btn-primary" id="btnAddEvent" style="display:none;">
-    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-    <span class="btn-label">Nueva actividad</span>
-  </button>
-  <button class="btn-icon" id="btnTheme" aria-label="Cambiar tema"></button>
-  <button class="btn" id="btnAuth"><span class="btn-label" id="btnAuthLabel">Acceder</span></button>
+  <div class="tb-group tb-actions">
+    <span id="connStatus"></span>
+    <span id="editorStatus"></span>
+    <button class="btn btn-primary" id="btnAddEvent" style="display:none;">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      <span class="btn-label">Nueva actividad</span>
+    </button>
+    <button class="btn-icon" id="btnTheme" aria-label="Cambiar tema"></button>
+    <button class="btn" id="btnAuth"><span class="btn-label" id="btnAuthLabel">Acceder</span></button>
+  </div>
 </div>
 
 <div class="scrim" id="scrim"></div>
@@ -1068,7 +1110,7 @@ function renderTimeGrid(main, numDays){
   const days = [];
   for(let i=0;i<numDays;i++) days.push(addDays(start, i));
   const today = new Date();
-  const cols = '60px repeat('+numDays+', 1fr)';
+  const cols = '60px repeat('+numDays+', minmax(0,1fr))';
 
   const headerRow = document.createElement('div');
   headerRow.className = 'time-header-row';
